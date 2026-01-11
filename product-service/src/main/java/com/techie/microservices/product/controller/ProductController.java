@@ -2,6 +2,7 @@ package com.techie.microservices.product.controller;
 
 import com.techie.microservices.product.model.Product;
 import com.techie.microservices.product.service.ProductService;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +19,7 @@ public class ProductController {
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public Product createProduct(@RequestBody Product product) {
         return productService.createProduct(product);
     }

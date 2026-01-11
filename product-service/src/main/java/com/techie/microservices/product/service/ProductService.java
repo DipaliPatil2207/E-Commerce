@@ -4,7 +4,6 @@ import com.techie.microservices.product.model.Product;
 import com.techie.microservices.product.repository.ProductRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 @Slf4j
@@ -17,13 +16,14 @@ public class ProductService {
     }
 
     public Product createProduct(Product product) {
-        productRepository.save(product);
-        log.info("Product created successfully");
-        return product;
+        Product saveProduct = productRepository.save(product);
+        System.out.println("Product created successfully: {}"+saveProduct);
+//        log.info("Product created successfully: {}", saveProduct);
+        return saveProduct;
     }
 
     public List<Product> getAllProducts() {
-        log.info("Return product list.");
+//        log.info("Return product list.");
         return productRepository.findAll();
     }
 }
