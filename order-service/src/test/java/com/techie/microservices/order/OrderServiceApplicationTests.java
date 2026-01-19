@@ -1,24 +1,25 @@
 package com.techie.microservices.order;
 
+import com.techie.microservices.order.stubs.InventoryClientStub;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.context.annotation.Import;
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import io.restassured.RestAssured;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureWireMock(port = 0)
 class OrderServiceApplicationTests {
 
 	@Container
-	static MySQLContainer<?> mySQLContainer = new MySQLContainer<>("mysql:8.0.33")
-			.withDatabaseName("order_service")
-			.withUsername("root")
-			.withPassword("MySecret123!");
+	static MySQLContainer<?> mySQLContainer = new MySQLContainer<>("mysql:8.0.33");
 
 
 	@LocalServerPort
@@ -34,26 +35,30 @@ class OrderServiceApplicationTests {
 		mySQLContainer.start();
 	}
 
+
 	@Test
 	void shouldOrderPlaced() {
 		String requestBody = """
 				{
-				    "skuCode": "iphone16",
+				    "skuCode": "iphone_15",
 				    "price": 4512,
 				    "quantity": 1
 				}""";
 
-		RestAssured.given()
+		InventoryClientStub.stubInventoryCall("iphone_15", 1);
+
+		var responseBodyString = RestAssured.given()
 				.contentType("application/json")
 				.body(requestBody)
 				.when()
 				.post("api/order")
 				.then()
+				.log().all()
 				.statusCode(201)
-				.body("quantity", Matchers.equalTo(1))
-				.body("price", Matchers.equalTo(4512))
-				.body("skuCode", Matchers.equalTo("iphone16"))
-				.body("id", Matchers.notNullValue());
+				.extract()
+				.body()
+				.asString();
+		assertThat(responseBodyString, Matchers.is("Order Placed Successfully"));
 	}
 
 }

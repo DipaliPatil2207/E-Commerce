@@ -26,6 +26,13 @@ public class ProductController {
 
     @GetMapping
     public List<Product> getAllProducts() {
+
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
         return productService.getAllProducts();
     }
 }
